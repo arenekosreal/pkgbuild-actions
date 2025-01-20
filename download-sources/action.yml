@@ -1,0 +1,21 @@
+name: Download sources
+description: Download $sources in PKGBUILD with customized program
+
+inputs:
+  directory:
+    description: The directory contains PKGBUILD.
+    required: true
+
+  downloader:
+    description: The program to download sources.
+    required: false
+    default: wget
+
+runs:
+  using: docker
+  image: ../Dockerfile.${{ runner.arch }}
+  entrypoint: "/entrypoint.sh"
+  args:
+    - download-sources
+    - \"${{ inputs.directory }}\"
+    - \"${{ inputs.downloader }}\"

@@ -1,0 +1,24 @@
+name: Get global variable
+description: Get top-level variable defined in PKGBUILD.
+
+inputs:
+  directory:
+    description: The directory contains PKGBUILD.
+    required: true
+
+  name:
+    description: The name of variable.
+    required: true
+
+outputs:
+  value:
+    description: The value of name in PKGBUILD.
+
+runs:
+  using: docker
+  image: ../Dockerfile.${{ runner.arch }}
+  entrypoint: "/entrypoint.sh"
+  args:
+    - get-global-variable
+    - \"${{ inputs.directory }}\"
+    - \"${{ inputs.name }}\"

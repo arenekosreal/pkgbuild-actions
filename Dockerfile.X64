@@ -1,0 +1,7 @@
+FROM --platform=amd64 archlinux:base-devel
+
+RUN useradd -r -d /build builder
+RUN mkdir -p /pkgdest /srcdest
+RUN chown builder:builder /pkgdest /srcdest
+RUN echo 'builder ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/100-builder
+COPY entrypoint.sh /entrypoint.sh

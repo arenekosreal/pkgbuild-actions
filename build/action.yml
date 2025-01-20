@@ -1,0 +1,31 @@
+name: Build PKGBUILD
+description: Build PKGBUILD in a container
+
+inputs:
+  directory:
+    description: The directory contains PKGBUILD.
+    required: true
+
+  env:
+    description: The newline splitted KEY=VALUE pairs which will be used as environment variable.
+    required: false
+    default: ''
+
+  repo:
+    description: The path to custom pacman repository to storage extra dependencies.
+    required: false
+    default: ''
+
+outputs:
+  packages:
+    description: The newline splitted packages paths.
+
+runs:
+  using: docker
+  image: ../Dockerfile.${{ runner.arch }}
+  entrypoint: "/entrypoint.sh"
+  args:
+    - build
+    - \"${{ inputs.directory }}\"
+    - \"${{ inputs.env }}\"
+    - \"${{ inputs.repo }}\"

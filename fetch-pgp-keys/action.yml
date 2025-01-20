@@ -1,0 +1,19 @@
+name: Fetch PGP public keys
+description: Fetch PGP public keys in $validpgpkeys in PKGBUILD and export ascii content in ./keys/pgp folder
+
+inputs:
+  directory:
+    description: The directory contains PKGBUILD.
+    required: true
+
+outputs:
+  validpgpkeys:
+    description: The space splitted fingerprints.
+
+runs:
+  using: docker
+  image: ../Dockerfile.${{ runner.arch }}
+  entrypoint: "/entrypoint.sh"
+  args:
+    - fetch-pgp-keys
+    - \"${{ inputs.directory }}\"

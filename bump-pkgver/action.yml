@@ -1,0 +1,31 @@
+name: Bump pkgver
+description: Bump $pkgver by running pkgver()
+
+inputs:
+  directory:
+    description: The directory contains PKGBUILD.
+    required: true
+
+  env:
+    description: The newline splitted KEY=VALUE pairs which will be used as environment variable.
+    required: false
+    default: ''
+
+  repo:
+    description: The path to custom pacman repository to storage extra dependencies.
+    required: false
+    default: ''
+
+outputs:
+  updated:
+    description: If the PKGBUILD is updated.
+
+runs:
+  using: docker
+  image: ../Dockerfile.${{ runner.arch }}
+  entrypoint: "/entrypoint.sh"
+  args:
+    - bump-pkgver
+    - \"${{ inputs.directory }}\"
+    - \"${{ inputs.env }}\"
+    - \"${{ inputs.repo }}\"

@@ -1,0 +1,23 @@
+pkgname=build-test
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Dummy package for testing purpose."
+arch=(any)
+url="https://github.com/arenekosreal/pkgbuild-actions"
+license=(LicenseRef-WTFPL)
+source=()
+sha256sums=()
+validpgpkeys=(
+    # This may be no user id on keys.openpgp.org
+    4ABA2F66DBD5A95894910E0673D770CDA59047B9 #  HPLIP (HP Linux Imaging and Printing) <hplip@hp.com>
+    # This may be not found on keyserver.ubuntu.com
+    3F59043BE267E1B1177688AC8F6DE3D614FCFD7A # nobody <nfo@localcdn.org>
+)
+
+pkgver() {
+    echo 0.2.0
+}
+
+package() {
+    env | install -Dm644 /dev/stdin "$pkgdir/var/env"
+}

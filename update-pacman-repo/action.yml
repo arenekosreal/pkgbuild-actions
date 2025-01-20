@@ -1,0 +1,19 @@
+name: Update pacman repository
+description: Scan packages and create/update a pacman repository
+
+inputs:
+  directory:
+    description: The directory contains PKGBUILD.
+    required: true
+
+outputs:
+  packages:
+    description: The newline splitted paths of packages added.
+
+runs:
+  using: docker
+  image: ../Dockerfile.${{ runner.arch }}
+  entrypoint: "/entrypoint.sh"
+  args:
+    - update-pacman-repo
+    - \"${{ inputs.directory }}\"
