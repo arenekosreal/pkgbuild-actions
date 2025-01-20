@@ -1,4 +1,14 @@
-FROM curlimages/curl:latest AS bootstrapper
+# x86_64
+FROM --platform=linux/amd64 archlinux:base-devel
+
+RUN useradd -r -d /build builder
+RUN mkdir -p /pkgdest /srcdest
+RUN chown builder:builder /pkgdest /srcdest
+RUN echo 'builder ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/100-builder
+COPY entrypoint.sh /entrypoint.sh
+
+# aarch64
+FROM --platform=linux/arm64 curlimages/curl:latest AS bootstrapper
 
 ARG ALARM_URL=http://os.archlinuxarm.org
 
@@ -9,7 +19,7 @@ RUN curl -LO "$ALARM_URL/os/ArchLinuxARM-aarch64-latest.tar.gz"
 # FIXME: Use bsdtar instead
 RUN tar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C /alarm
 
-FROM --platform=arm64 scratch AS alarm
+FROM --platform=arm64 scratch
 
 COPY --from=bootstrapper /alarm/ /
 

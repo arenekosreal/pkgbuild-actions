@@ -12,7 +12,7 @@ outputs:
 
 runs:
   using: docker
-  image: ../Dockerfile.${{ runner.arch }}
+  image: ../Dockerfile
   entrypoint: "/entrypoint.sh"
   args:
     - fetch-pgp-keys
