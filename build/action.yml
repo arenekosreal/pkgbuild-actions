@@ -16,18 +16,13 @@ inputs:
     required: false
     default: ''
 
-  arch:
-    description: The architecture of target runner.
-    required: false
-    default: ${{ runner.arch }}
-
 outputs:
   packages:
     description: The newline splitted packages paths.
 
 runs:
   using: docker
-  image: ../Dockerfile.${{ inputs.arch }}
+  image: ../Dockerfile.${{ runner.arch }}
   entrypoint: "/entrypoint.sh"
   args:
     - build
