@@ -23,25 +23,12 @@ jobs:
       - name: Create builder
         run: docker buildx create --name pkgbuild-builder --use
 
-      - name: Build X86
+      - name: Buiild manifest and images
         run: |
-          docker buildx build -t ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:amd64 \
-            --platform linux/amd64 \
+          docker buildx build -t ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:latest \
+            --platform linux/amd64,linux/arm64 \
             --load \
             .
-
-      - name: Build ARM64
-        run: |
-          docker buildx build -t ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:arm64 \
-            --platform linux/arm64 \
-            --load \
-            .
-
-      - name: Generate manifest
-        run: |
-          docker manifest create ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:latest \
-            ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:amd64 \
-            ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:arm64
 
       - name: Inspect manifest
         run: docker manifest inspect ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:latest
