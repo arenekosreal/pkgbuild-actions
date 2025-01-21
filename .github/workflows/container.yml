@@ -1,0 +1,50 @@
+name: Build container image and publish to ghcr.io
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 8 * * *'
+
+jobs:
+  build-container:
+    name: Build container image and publish to ghcr.io
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Login
+        run: docker login ghcr.io --username ${{ github.repository_owner }}  --password ${{ github.token }}
+
+      - name: Create builder
+        run: docker buildx create --name pkgbuild-builder --use
+
+      - name: Build X86
+        run: |
+          docker buildx build -t ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:amd64 \
+            --platform linux/amd64 \
+            --target X64 \
+            .
+
+      - name: Build ARM64
+        run: |
+          docker buildx build -t ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:arm64 \
+            --platform linux/arm64 \
+            --target ARM64 \
+            .
+
+      - name: Generate manifest
+        run: |
+          docker manifest create ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:latest \
+            ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:amd64 \
+            ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:arm64
+
+      - name: Inspect manifest
+        run: docker manifest inspect ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:latest
+
+      - name: Upload to ghcr.io
+        run: docker manifest push ghcr.io/${{ github.repository_owner }}/pkgbuild-builder:latest

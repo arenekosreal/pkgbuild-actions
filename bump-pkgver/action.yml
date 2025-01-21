@@ -22,7 +22,7 @@ outputs:
 
 runs:
   using: docker
-  image: ../Dockerfile
+  image: docker://ghcr.io/arenekosreal/pkgbuild-builder:latest
   entrypoint: "/entrypoint.sh"
   args:
     - bump-pkgver
