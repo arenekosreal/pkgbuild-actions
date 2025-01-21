@@ -79,6 +79,13 @@ jobs:
         with:
           directory: repo   
 
+      - name: Check result
+        run: |
+          test -f repo/repo.db.tar.gz
+          test -f repo/repo.files.tar.gz
+          test -L repo/repo.db
+          test -L repo/repo.files
+
   test-build:
     name: Test build action
     needs:
@@ -123,5 +130,5 @@ jobs:
       - name: Check env
         if: matrix.env
         run: |
-          tar -x -f "${{ steps.test.outputs.pacckages }}"
+          tar -x -f "${{ steps.test.outputs.packages }}"
           grep "${{ matrix.env }}" ./var/env
