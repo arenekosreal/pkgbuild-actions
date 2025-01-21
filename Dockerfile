@@ -28,7 +28,7 @@ CMD ["/usr/bin/bash"]
 # archlinuxlarm:base-devel should be ready here
 # Followed template from https://gitlab.archlinux.org/archlinux/archlinux-docker/-/blob/master/Dockerfile.template
 
-FROM ${TARGETARCH}
+FROM ${TARGETARCH} AS builder
 RUN useradd -r -d /build builder && \
     mkdir -p /pkgdest /srcdest && \
     chown builder:builder /pkgdest /srcdest && \
