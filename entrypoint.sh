@@ -193,6 +193,7 @@ function build() {
         return 1
     fi
     __ensure_pkgbuild "$1"
+    local -r start_dir="$PWD"
     pushd "$1"
     __prepare_build_environment "$3"
     (
@@ -206,7 +207,7 @@ function build() {
         local eof
         eof="$(dd if=/dev/urandom bs=15 count=1 status=none | base64)"
         echo "packages<<$eof"
-        $SUDO /usr/bin/makepkg --packagelist | sed "s|$PKGDEST|$PKGDEST_ROOT|"
+        $SUDO /usr/bin/makepkg --packagelist | sed "s|$PKGDEST|$PKGDEST_ROOT|;s|$start_dir|.|"
         echo "$eof"
     } >> "$GITHUB_OUTPUT"
     popd
@@ -217,7 +218,7 @@ function build() {
         __log notice "Copying $package to $PKGDEST_ROOT..."
         cp "$package" "$PKGDEST_ROOT"
     done < <($SUDO /usr/bin/makepkg --pacagelist)
-    __log notice "You can find built package(s) at ${PKGDEST_ROOT//$GITHUB_WORKSPACE/.}"
+    __log notice "You can find built package(s) at ${PKGDEST_ROOT//$start_dir/.}"
 }
 
 # download-sources $dir $downloader
