@@ -86,11 +86,55 @@ jobs:
           test -L repo/repo.db
           test -L repo/repo.files
 
+  test-bump-pkgver:
+    name: Test bump-pkgver action
+    needs:
+      - build-container
+      - test-update-pacman-repo
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+        env:
+          - ''
+          - CUSTOM_ENVIRONMENT=custom-value
+        repo:
+          - ''
+          - repo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create repo
+        run: mkdir -p repo
+
+      - name: Generate repo
+        if: matrix.repo
+        uses: ./update-pacman-repo
+        with:
+          directory: repo
+
+      - name: Run action
+        id: test
+        uses: ./bump-pkgver
+        with:
+          directory: ./tests/build-test
+          env: ${{ matrix.env }}
+          repo: ${{ matrix.repo }}
+
+      - name: Check result
+        run: |
+          test "${{ steps.test.outputs.updated }}" == 'true'
+
   test-build:
     name: Test build action
     needs:
       - build-container
       - test-update-pacman-repo
+      - test-bump-pkgver
     if: github.event_name != 'schedule'
     runs-on: ${{ matrix.os }}
     strategy:
@@ -123,7 +167,7 @@ jobs:
         id: test
         uses: ./build
         with:
-          directory: ./tests/build
+          directory: ./tests/build-test
           env: ${{ matrix.env }}
           repo: ${{ matrix.repo }}
 
