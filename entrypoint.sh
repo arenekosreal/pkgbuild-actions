@@ -298,17 +298,17 @@ function update-pacman-repo() {
     {
         local repo eof
         repo="$(basename "$1")"
+        if [[ -z "$(ls -A)" ]]
+        then
+            /usr/bin/repo-add -q "$repo.db.tar.gz"
+        fi
         eof="$(dd if=/dev/urandom bs=15 count=1 status=none | base64)"
         echo "packages<<$eof"
         find . -maxdepth 1 -mindepth 1 -type f \
             -regex '.+\.pkg\.tar\.[0-9a-zA-Z]+$' \
-            -exec /usr/bin/repo-add -R -q "$repo.tar.gz" {} + \
+            -exec /usr/bin/repo-add -R -q "$repo.db.tar.gz" {} + \
             -printf "%f\n"
         echo "$eof"
-        if [[ -z "$(ls -A)" ]]
-        then
-            /usr/bin/repo-add -q "$repo.tar.gz"
-        fi
     } >> "$GITHUB_OUTPUT"
     popd
     __log notice "Result of repo directory:"
