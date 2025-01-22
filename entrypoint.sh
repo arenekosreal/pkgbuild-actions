@@ -196,27 +196,27 @@ function build() {
     local -r start_dir="$PWD"
     pushd "$1"
     __prepare_build_environment "$3"
+    __log notice "Running makepkg now..."
     (
         __append_extra_env "$2"
-        __log notice "Running makepkg now..."
         $SUDO /usr/bin/makepkg --syncdeps --holdver
     )
     __log notice "Syncing $SRCDEST to $SRCDEST_ROOT..."
     cp -r --no-preserve=ownership "$SRCDEST/." "$SRCDEST_ROOT"
-    {
-        local eof
-        eof="$(dd if=/dev/urandom bs=15 count=1 status=none | base64)"
-        echo "packages<<$eof"
-        $SUDO /usr/bin/makepkg --packagelist | sed "s|$PKGDEST|$PKGDEST_ROOT|;s|$start_dir|.|"
-        echo "$eof"
-    } >> "$GITHUB_OUTPUT"
     __log notice "Grabbing built packages..."
-    local package
+    local package eof
+    eof="$(dd if=/dev/urandom bs=15 count=1 status=none | base64)"
+    echo "packages<<$eof" >> "$GITHUB_OUTPUT"
     while read -r package
     do
-        __log notice "Copying $package to $PKGDEST_ROOT..."
-        cp "$package" "$PKGDEST_ROOT"
+        if [[ -f "$package" ]]
+        then
+            __log notice "Copying $package to $PKGDEST_ROOT..."
+            cp "$package" "$PKGDEST_ROOT"
+            echo "$package" | sed "s|$PKGDEST|$PKGDEST_ROOT|;s|$start_dir|.|" >> "$GITHUB_OUTPUT"
+        fi
     done < <($SUDO /usr/bin/makepkg --packagelist)
+    echo "$eof" >> "$GITHUB_OUTPUT"
     __log notice "You can find built package(s) at ${PKGDEST_ROOT//$start_dir/.}"
     popd
 }
