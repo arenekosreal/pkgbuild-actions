@@ -134,7 +134,6 @@ jobs:
     needs:
       - build-container
       - test-update-pacman-repo
-      - test-bump-pkgver
     if: github.event_name != 'schedule'
     runs-on: ${{ matrix.os }}
     strategy:
