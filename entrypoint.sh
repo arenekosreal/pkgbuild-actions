@@ -216,7 +216,7 @@ function build() {
     do
         __log notice "Copying $package to $PKGDEST_ROOT..."
         cp "$package" "$PKGDEST_ROOT"
-    done < <($SUDO /usr/bin/maepkg --pacagelist)
+    done < <($SUDO /usr/bin/makepkg --pacagelist)
     __log notice "You can find built package(s) at ${PKGDEST_ROOT//$GITHUB_WORKSPACE/.}"
 }
 
