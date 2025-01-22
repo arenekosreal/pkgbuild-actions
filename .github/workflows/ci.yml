@@ -110,6 +110,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Create repo
+        run: mkdir -p repo
+
       - name: Generate repo
         if: matrix.repo
         uses: ./update-pacman-repo
