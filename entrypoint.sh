@@ -302,16 +302,16 @@ function update-pacman-repo() {
         echo "packages<<$eof"
         if ! find . -maxdepth 1 -mindepth 1 -type f \
             -regex '.+\.pkg\.tar\.[0-9a-zA-Z]+$' \
-            -exec /usr/bin/repo-add -R -q "$1/$repo.tar.gz" {} + \
+            -exec /usr/bin/repo-add -R -q "$repo.tar.gz" {} + \
             -printf "%f\n"
         then
-            /usr/bin/repo-add -q "$1/$repo.tar.gz"
+            /usr/bin/repo-add -q "$repo.tar.gz"
         fi
         echo "$eof"
     } >> "$GITHUB_OUTPUT"
+    popd
     __log notice "Result of repo directory:"
     ls -l "$1"
-    popd
 }
 
 # get-global-variable $dir $name
