@@ -13,9 +13,9 @@ inputs:
 
 runs:
   using: docker
-  image: docker://ghcr.io/arenekosreal/pkgbuild-builder:latest
+  image: docker://ghcr.io/arenekosreal/pkgbuild-builder:main
   entrypoint: "/entrypoint.sh"
   args:
     - download-sources
-    - \"${{ inputs.directory }}\"
-    - \"${{ inputs.downloader }}\"
+    - ${{ inputs.directory }}
+    - ${{ inputs.downloader }}

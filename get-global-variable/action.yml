@@ -16,9 +16,9 @@ outputs:
 
 runs:
   using: docker
-  image: docker://ghcr.io/arenekosreal/pkgbuild-builder:latest
+  image: docker://ghcr.io/arenekosreal/pkgbuild-builder:main
   entrypoint: "/entrypoint.sh"
   args:
     - get-global-variable
-    - \"${{ inputs.directory }}\"
-    - \"${{ inputs.name }}\"
+    - ${{ inputs.directory }}
+    - ${{ inputs.name }}
