@@ -300,14 +300,15 @@ function update-pacman-repo() {
         repo="$(basename "$1")"
         eof="$(dd if=/dev/urandom bs=15 count=1 status=none | base64)"
         echo "packages<<$eof"
-        if ! find . -maxdepth 1 -mindepth 1 -type f \
+        find . -maxdepth 1 -mindepth 1 -type f \
             -regex '.+\.pkg\.tar\.[0-9a-zA-Z]+$' \
             -exec /usr/bin/repo-add -R -q "$repo.tar.gz" {} + \
             -printf "%f\n"
+        echo "$eof"
+        if [[ -z "$(ls -A)" ]]
         then
             /usr/bin/repo-add -q "$repo.tar.gz"
         fi
-        echo "$eof"
     } >> "$GITHUB_OUTPUT"
     popd
     __log notice "Result of repo directory:"
