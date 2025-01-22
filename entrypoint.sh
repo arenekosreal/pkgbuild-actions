@@ -341,12 +341,19 @@ function get-global-variable() {
     popd
 }
 
-if ! [[ "$1" =~ ^_ ]] && [[ "$(type -t "$1")" == "function" ]]
+if [[ -n "$1" ]]
 then
-    __log debug "Invoking action with arguments $*..."
-    # shellcheck disable=SC2068
-    $@
+    if [[ "$1" =~ ^[^_] ]] && [[ "$(type -t "$1")" == "function" ]]
+    then
+        __log debug "Invoking action with arguments $*..."
+        # shellcheck disable=SC2068
+        $@
+    else
+        __log error "Unsupported action $1."
+        __log debug "Type of action $1 is $(type -t "$1")."
+        exit 2
+    fi
 else
-    __log error "Unsupported action $1."
+    __log error "No action is provided."
     exit 2
 fi
