@@ -19,6 +19,20 @@ function __log() {
     fi
 }
 
+# __ensure_pkgbuild $dir
+function __ensure_pkgbuild() {
+    if [[ $# -lt 1 ]]
+    then
+        __log error "Invalid arguments for __ensure_pkgbuild. Expect >=1, got $#."
+        return 1
+    fi
+    if [[ ! -f "$1/PKGBUILD" ]]
+    then
+        __log error "No PKGBUILD can be found at $1/"
+        return 1
+    fi
+}
+
 # __check_pacman_key
 function __check_pacman_key() {
     __log notice "Checking pacman-key..."
@@ -118,12 +132,6 @@ function __prepare_build_environment() {
     pacman -Sy
 }
 
-if [[ ! -f "$2/PKGBUILD" ]]
-then
-    __log error "No PKGBUILD can be found at $2/"
-    exit 1
-fi
-
 export BUILDDIR=/build PKGDEST=/pkgdest SRCDEST=/srcdest
 
 declare PKGDEST_ROOT="$GITHUB_WORKSPACE$PKGDEST" \
@@ -145,6 +153,7 @@ function bump-pkgkver() {
         __log error "Invalid arguments for bump-pkgver. Expect >=3, got $#."
         return 1
     fi
+    __ensure_pkgbuild "$1"
     pushd "$1"
     __prepare_build_environment "$3"
     __log notice "Copying PKGBUILD to a writable place..."
@@ -178,6 +187,7 @@ function build() {
         __log error "Invalid arguments for build. Expect >=3, got $#."
         return 1
     fi
+    __ensure_pkgbuild "$1"
     pushd "$1"
     __prepare_build_environment "$3"
     (
@@ -212,6 +222,7 @@ function download-sources() {
         __log error "Invalid arguments for download-sources. Expect >=2, got $#."
         return 1
     fi
+    __ensure_pkgbuild "$1"
     pushd "$1"
     local source
     while read -r source
@@ -251,6 +262,7 @@ function fetch-pgp-keys() {
         return 1
     fi
     local -r FALLBACK_KEYSERVER="keyserver.ubuntu.com"
+    __ensure_pkgbuild "$1"
     pushd "$1"
     local validpgpkeys
     validpgpkeys="$($SUDO /usr/bin/makepkg --printsrcinfo | grep validpgpkeys | cut -d = -f 2 | xargs)"
@@ -309,6 +321,7 @@ function get-global-variable() {
         __log error "Invalid arguments for get-global-variable. Expect >=2, got $#."
         return 1
     fi
+    __ensure_pkgbuild "$1"
     pushd "$1"
     local -a lines
     local srcinfo
