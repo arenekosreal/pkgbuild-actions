@@ -210,7 +210,6 @@ function build() {
         $SUDO /usr/bin/makepkg --packagelist | sed "s|$PKGDEST|$PKGDEST_ROOT|;s|$start_dir|.|"
         echo "$eof"
     } >> "$GITHUB_OUTPUT"
-    popd
     __log notice "Grabbing built packages..."
     local package
     while read -r package
@@ -219,6 +218,7 @@ function build() {
         cp "$package" "$PKGDEST_ROOT"
     done < <($SUDO /usr/bin/makepkg --packagelist)
     __log notice "You can find built package(s) at ${PKGDEST_ROOT//$start_dir/.}"
+    popd
 }
 
 # download-sources $dir $downloader
