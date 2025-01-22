@@ -172,10 +172,19 @@ jobs:
           repo: ${{ matrix.repo }}
 
       - name: Check outputs
-        run: test -n "${{ steps.test.outputs.packages }}"
+        run: |
+          while read -r package
+          do
+            test -f "$package"
+          done <<< "${{ steps.test.outputs.packages }}"
 
       - name: Check env
         if: matrix.env
         run: |
-          tar -x -f "${{ steps.test.outputs.packages }}"
-          grep "${{ matrix.env }}" ./var/env
+          while read -r package
+          do
+            mkdir -p rootfs
+            tar -x -f "$package" -C rootfs
+            grep "${{ matrix.env }}" rootfs/var/env
+            rm -r rootfs
+          done <<< "${{ steps.test.outputs.packages }}"
