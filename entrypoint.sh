@@ -147,7 +147,7 @@ SUDO="/usr/bin/sudo -u builder \
            --preserve-env=SOURCE_DATE_EPOCH"
 
 # bump-pkgver $dir [$env] [$repo]
-function bump-pkgkver() {
+function bump-pkgver() {
     if [[ $# -lt 1 ]]
     then
         __log error "Invalid arguments for bump-pkgver. Expect >=1, got $#."
