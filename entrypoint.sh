@@ -206,7 +206,7 @@ function build() {
         local eof
         eof="$(dd if=/dev/urandom bs=15 count=1 status=none | base64)"
         echo "packages<<$eof"
-        $SUDO /usr/bin/makepkg --packagelist | sed "s|$PWD|./$PKGDEST|"
+        $SUDO /usr/bin/makepkg --packagelist | sed "s|$PKGDEST|$PKGDEST_ROOT|"
         echo "$eof"
     } >> "$GITHUB_OUTPUT"
     popd
