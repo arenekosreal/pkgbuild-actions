@@ -102,9 +102,14 @@ function __append_extra_env() {
     local env_line
     while read -r env_line
     do
-        __log notice "Exporting environment $env_line now..."
-        export "${env_line?}"
-        SUDO+=" --preserve-env=$(echo "$env_line" | cut -d = -f 1 | xargs)"
+        if [[ "$env_line" =~ .+=.+ ]]
+        then
+            __log notice "Exporting environment $env_line now..."
+            export "${env_line?}"
+            SUDO+=" --preserve-env=$(echo "$env_line" | cut -d = -f 1 | xargs)"
+        else
+            __log debug "Invalid environment $env_line, skipping..."
+        fi
     done <<< "$1"
 }
 
