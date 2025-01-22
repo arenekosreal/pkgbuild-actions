@@ -124,7 +124,7 @@ function __prepare_build_environment() {
         # shellcheck disable=SC2086
         find keys/pgp -maxdepth 1 -mindepth 1 -type f -regex ".+\.asc$" -exec $SUDO gpg --import {} \;
     fi
-    if [[ -n "$1" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.db" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.files" ]]
+    if [[ -n "$1" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.db" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.files" ]] && ! pacman-conf --repo="$1" > /dev/null
     then
         __log notice "Adding repository at $1..."
         echo -e "[$1]\nServer = file://$GITHUB_WORKSPACE/$1\nSigLevel = Optional TrustAll" | tee -a /etc/pacman.conf
