@@ -81,7 +81,7 @@ function __invoke_downloader() {
                 __log error "Unsupported downloader $1"
                 return 1
         esac
-    elif ! __install_downloader "$1"
+    elif __install_downloader "$1"
     then
         __invoke_downloader "$1" "$2" "$3"
     else
