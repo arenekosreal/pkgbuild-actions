@@ -124,7 +124,7 @@ function __prepare_build_environment() {
         # shellcheck disable=SC2086
         find keys/pgp -maxdepth 1 -mindepth 1 -type f -regex ".+\.asc$" -exec $SUDO gpg --import {} \;
     fi
-    if [[ -e "$GITHUB_WORKSPACE/$1/$1.db" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.files" ]]
+    if [[ -n "$1" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.db" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.files" ]]
     then
         __log notice "Adding repository at $1..."
         echo -e "[$1]\nServer = file://$GITHUB_WORKSPACE/$1\nSigLevel = Optional TrustAll" | tee -a /etc/pacman.conf
@@ -146,11 +146,11 @@ SUDO="/usr/bin/sudo -u builder \
            --preserve-env=SRCDEST  \
            --preserve-env=SOURCE_DATE_EPOCH"
 
-# bump-pkgver $dir $env $repo
+# bump-pkgver $dir [$env] [$repo]
 function bump-pkgkver() {
-    if [[ $# -lt 3 ]]
+    if [[ $# -lt 1 ]]
     then
-        __log error "Invalid arguments for bump-pkgver. Expect >=3, got $#."
+        __log error "Invalid arguments for bump-pkgver. Expect >=1, got $#."
         return 1
     fi
     __ensure_pkgbuild "$1"
@@ -180,11 +180,11 @@ function bump-pkgkver() {
     popd
 }
 
-# build $dir $env $repo
+# build $dir [$env] [$repo]
 function build() {
-    if [[ $# -lt 3 ]]
+    if [[ $# -lt 1 ]]
     then
-        __log error "Invalid arguments for build. Expect >=3, got $#."
+        __log error "Invalid arguments for build. Expect >=1, got $#."
         return 1
     fi
     __ensure_pkgbuild "$1"
