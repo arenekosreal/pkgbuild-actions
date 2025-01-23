@@ -1,4 +1,4 @@
-name: Build container image, publish to ghcr.io and test actions
+name: Build container image, publish to ghcr.io ${{ github.event_name == 'schedule' && '' || 'and test actions' }}
 on:
   push:
     branches:
