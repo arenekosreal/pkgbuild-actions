@@ -68,7 +68,7 @@ function __install_downloader() {
         return 1
     fi
     __check_pacman_key
-    pacman -Sy
+    pacman -Fy
     local package
     package="$(pacman -Fq "/usr/bin/$1")"
     if [[ -z "$package" ]]
