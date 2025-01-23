@@ -288,7 +288,7 @@ function fetch-pgp-keys() {
         gpg --recv-keys "$fingerprint" || true
         if ! gpg --list-key "$fingerprint"
         then
-            local fallback
+            local fallback success=false
             for fallback in "${FALLBACK_KEYSERVER[@]}"
             do
                 __log warning "Failed to fetch GnuPG keys with default keyserver, retrying with $fallback..."
@@ -298,9 +298,15 @@ function fetch-pgp-keys() {
                     __log warning "Failed to fetch GnuPG keys with $fallback, retrying with next fallback server..."
                 else
                     __log info "Fetch GnuPG keys with $fallback successfully."
+                    success=true
                     break
                 fi
             done
+            if ! "$success"
+            then
+                __log error "Failed to fetch GnuPG keys with all fallback servers."
+                return 2
+            fi
         fi
         gpg --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
     done
