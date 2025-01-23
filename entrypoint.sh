@@ -32,6 +32,7 @@ function __log() {
             ;;
         *)
             echo "$2"
+            ;;
     esac
 }
 
