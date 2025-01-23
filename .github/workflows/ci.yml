@@ -187,3 +187,29 @@ jobs:
             grep "${{ matrix.env }}" rootfs/var/env
             rm -r rootfs
           done <<< "${{ steps.test.outputs.packages }}"
+
+  test-get-global-variable:
+    name: Test get-global-variable action
+    needs:
+      - build-container
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run action
+        id: test
+        uses: ./get-global-variable
+        with:
+          directory: ./tests/build-test
+          name: pkgbase
+
+      - name: Check result
+        run: |
+          test "${{ steps.test.outputs.value }}" = "build-test"
