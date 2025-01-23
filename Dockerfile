@@ -1,5 +1,5 @@
 # x86_64
-FROM --platform=linux/amd64 archlinux:base-devel AS amd64
+FROM --platform=linux/amd64 archlinux:base-devel AS base-devel-amd64
 
 # aarch64
 FROM curlimages/curl:latest AS downloader-arm64
@@ -23,13 +23,13 @@ RUN mkdir -p /alarm/var/lib/pacman && \
     rm -rf /alarm/etc/pacman.d/gnupg /alarm/var/cache/pacman
 # https://gitlab.archlinux.org/archlinux/archlinux-docker/blob/master/README.md#principles
 # https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys
-FROM --platform=linux/arm64 scratch AS arm64
+FROM --platform=linux/arm64 scratch AS base-devel-arm64
 COPY --from=bootstrapper-arm64 /alarm/ /
 CMD ["/usr/bin/bash"]
 # archlinuxlarm:base-devel should be ready here
 # Followed template from https://gitlab.archlinux.org/archlinux/archlinux-docker/-/blob/master/Dockerfile.template
 
-FROM ${TARGETARCH} AS builder
+FROM base-devel-${TARGETARCH} AS base-devel
 RUN useradd -r -d /build -m builder && \
     mkdir -p /pkgdest /srcdest && \
     chown builder:builder /pkgdest /srcdest && \
