@@ -2,6 +2,18 @@
 
 set -e
 
+export BUILDDIR=/build PKGDEST=/pkgdest SRCDEST=/srcdest
+
+declare PKGDEST_ROOT="$GITHUB_WORKSPACE$PKGDEST" \
+        SRCDEST_ROOT="$GITHUB_WORKSPACE$SRCDEST"
+mkdir -p "$SRCDEST_ROOT" "$PKGDEST_ROOT"
+
+SUDO="/usr/bin/sudo -u builder \
+           --preserve-env=BUILDDIR \
+           --preserve-env=PKGDEST  \
+           --preserve-env=SRCDEST  \
+           --preserve-env=SOURCE_DATE_EPOCH"
+
 # __log $level $msg
 function __log() {
     if [[ $# -lt 2 ]]
@@ -136,20 +148,6 @@ function __prepare_build_environment() {
     fi
     pacman -Sy
 }
-
-export BUILDDIR=/build PKGDEST=/pkgdest SRCDEST=/srcdest
-
-declare PKGDEST_ROOT="$GITHUB_WORKSPACE$PKGDEST" \
-        SRCDEST_ROOT="$GITHUB_WORKSPACE$SRCDEST"
-mkdir -p "$SRCDEST_ROOT" "$PKGDEST_ROOT"
-
-
-
-SUDO="/usr/bin/sudo -u builder \
-           --preserve-env=BUILDDIR \
-           --preserve-env=PKGDEST  \
-           --preserve-env=SRCDEST  \
-           --preserve-env=SOURCE_DATE_EPOCH"
 
 # bump-pkgver $dir [$env] [$repo]
 function bump-pkgver() {
