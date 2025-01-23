@@ -213,3 +213,34 @@ jobs:
       - name: Check result
         run: |
           test "${{ steps.test.outputs.value }}" = "build-test"
+
+  test-fetch-pgp-keys:
+    name: Test fetch-pgp-keys action
+    needs:
+      - build-container
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run action
+        id: test
+        uses: ./fetch-pgp-keys
+        with:
+          directory: ./tests/build-test
+
+      - name: Check result
+        run: |
+          read -r -a fingerprints <<< "${{ steps.test.outputs.validpgpkeys }}"
+          for fingerprint in "${fingerprints[@]}"
+          do
+            test -f ./tests/build-test/keys/pgp/$fingerprint.asc
+            gpg --import ./tests/build-test/keys/pgp/$fingerprint.asc
+            gpg --list-key $fingerprint
+          done
