@@ -292,7 +292,7 @@ function fetch-pgp-keys() {
             for fallback in "${FALLBACK_KEYSERVER[@]}"
             do
                 __log warning "Failed to fetch GnuPG keys with default keyserver, retrying with $fallback..."
-                gpg --recv-keys --keyserver "$fallback" "$fingerprint"
+                gpg --recv-keys --keyserver "$fallback" "$fingerprint" || true
                 if ! gpg --list-key "$fingerprint"
                 then
                     __log warning "Failed to fetch GnuPG keys with $fallback, retrying with next fallback server..."
