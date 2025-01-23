@@ -244,3 +244,29 @@ jobs:
             gpg --import ./tests/build-test/keys/pgp/$fingerprint.asc
             gpg --list-key $fingerprint
           done
+
+  test-download-sources:
+    name: Test download-sources action
+    needs:
+      - build-container
+    if: github.event_name != 'schedule'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run action
+        id: test
+        uses: ./download-sources
+        with:
+          directory: ./tests/build-test
+
+      - name: Check result
+        run: |
+          test -f srcdest/gh_2.65.0_linux_amd64.tar.gz
+          test -f srcdest/gh-linux.deb

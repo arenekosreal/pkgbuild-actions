@@ -5,8 +5,10 @@ pkgdesc="Dummy package for testing purpose."
 arch=(any)
 url="https://github.com/arenekosreal/pkgbuild-actions"
 license=(LicenseRef-WTFPL)
-source=()
-sha256sums=()
+source=(https://github.com/cli/cli/releases/download/v2.65.0/gh_2.65.0_linux_amd64.tar.gz
+        gh-linux.deb::https://github.com/cli/cli/releases/download/v2.65.0/gh_2.65.0_linux_amd64.deb)
+sha256sums=('762569efe785082b7d1feb06995efece1a9cecce16da8503ac6fdbcbea04085b'
+            'df1c9f5bfe6d0443c19f36d2c83390b650f7262e687b31db8353a604cc4ad4b4')
 validpgpkeys=(
     # This may be no user id on keys.openpgp.org
     4ABA2F66DBD5A95894910E0673D770CDA59047B9 #  HPLIP (HP Linux Imaging and Printing) <hplip@hp.com>

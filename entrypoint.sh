@@ -257,6 +257,8 @@ function download-sources() {
             return 1
         fi
     done < <($SUDO /usr/bin/makepkg --printsrcinfo | grep source | cut -d = -f 2 | sed 's/^[[:space:]]*//')
+    __log notice "Syncing $SRCDEST to $SRCDEST_ROOT..."
+    cp -r --no-preserve=ownership "$SRCDEST/." "$SRCDEST_ROOT"
     popd
 }
 
