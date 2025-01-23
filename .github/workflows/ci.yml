@@ -270,3 +270,5 @@ jobs:
         run: |
           test -f srcdest/gh_2.65.0_linux_amd64.tar.gz
           test -f srcdest/gh-linux.deb
+          test "$(sha256sum srcdest/gh_2.65.0_linux_amd64.tar.gz | awk '{print $1}')" = "762569efe785082b7d1feb06995efece1a9cecce16da8503ac6fdbcbea04085b"
+          test "$(sha256sum srcdest/gh-linux.deb | awk '{print $1}')" = "df1c9f5bfe6d0443c19f36d2c83390b650f7262e687b31db8353a604cc4ad4b4"
