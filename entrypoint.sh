@@ -21,14 +21,18 @@ function __log() {
         __log error "Invalid arguments for __log. Expect >=2, got $#."
         return 1
     fi
-    if [[ "$1" == "debug" ]]
-    then
-        echo "::$1::$2"
-    else
-        local -a context
-        read -r -a context < <(caller)
-        echo "::$1 file=${context[0]},line=${context[1]}::$2"
-    fi
+    case "$1" in
+        warning|notice|error)
+            local -a context
+            read -r -a context < <(caller)
+            echo "::$1 file=${context[0]},line=${context[1]}::$2"
+            ;;
+        debug)
+            echo "::$1::$2"
+            ;;
+        *)
+            echo "$2"
+    esac
 }
 
 # __ensure_pkgbuild $dir
@@ -47,7 +51,7 @@ function __ensure_pkgbuild() {
 
 # __check_pacman_key
 function __check_pacman_key() {
-    __log notice "Checking pacman-key..."
+    __log info "Checking pacman-key..."
     if [[ ! -d /etc/pacman.d/gnupg ]]
     then
         pacman-key --init
@@ -116,7 +120,7 @@ function __append_extra_env() {
     do
         if [[ "$env_line" =~ .+=.+ ]]
         then
-            __log notice "Exporting environment $env_line now..."
+            __log info "Exporting environment $env_line now..."
             export "${env_line?}"
             SUDO+=" --preserve-env=$(echo "$env_line" | cut -d = -f 1 | xargs)"
         else
@@ -132,18 +136,18 @@ function __prepare_build_environment() {
         __log error "Invalid arguments for __prepare_build_environment. Expect >=1, got $#."
         return 1
     fi
-    __log notice "Syncing $SRCDEST_ROOT to $SRCDEST..."
+    __log info "Syncing $SRCDEST_ROOT to $SRCDEST..."
     $SUDO cp -r "$SRCDEST_ROOT/." "$SRCDEST"
     __check_pacman_key
     if [[ -d keys/pgp ]]
     then
-        __log notice "Importing GnuPG public keys..."
+        __log info "Importing GnuPG public keys..."
         # shellcheck disable=SC2086
         find keys/pgp -maxdepth 1 -mindepth 1 -type f -regex ".+\.asc$" -exec $SUDO gpg --import {} \;
     fi
     if [[ -n "$1" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.db" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.files" ]] && ! pacman-conf --repo="$1" > /dev/null
     then
-        __log notice "Adding repository at $1..."
+        __log info "Adding repository at $1..."
         echo -e "[$1]\nServer = file://$GITHUB_WORKSPACE/$1\nSigLevel = Optional TrustAll" | tee -a /etc/pacman.conf
     fi
     pacman -Sy
@@ -159,14 +163,14 @@ function bump-pkgver() {
     __ensure_pkgbuild "$1"
     pushd "$1"
     __prepare_build_environment "$3"
-    __log notice "Copying PKGBUILD to a writable place..."
+    __log info "Copying PKGBUILD to a writable place..."
     local tmp
     tmp="$($SUDO mktemp -d -t "PKGBUILD-pkgver-XXXXXX")"
     $SUDO cp -r . "$tmp"
     pushd "$tmp"
     (
         __append_extra_env "$2"
-        __log notice "Running makepkg now..."
+        __log info "Running makepkg now..."
         $SUDO /usr/bin/makepkg --syncdeps --nobuild
     )
     popd
@@ -175,10 +179,10 @@ function bump-pkgver() {
         echo "updated=false" >> "$GITHUB_OUTPUT"
     else
         echo "updated=true" >> "$GITHUB_OUTPUT"
-        __log notice "Updating PKGBUILD with updated one..."
+        __log info "Updating PKGBUILD with updated one..."
         cp "$tmp/PKGBUILD" ./PKGBUILD
     fi
-    __log notice "Syncing $SRCDEST to $SRCDEST_ROOT..."
+    __log info "Syncing $SRCDEST to $SRCDEST_ROOT..."
     cp -r --no-preserve=ownership "$SRCDEST/." "$SRCDEST_ROOT"
     popd
 }
@@ -194,14 +198,14 @@ function build() {
     local -r start_dir="$PWD"
     pushd "$1"
     __prepare_build_environment "$3"
-    __log notice "Running makepkg now..."
+    __log info "Running makepkg now..."
     (
         __append_extra_env "$2"
         $SUDO /usr/bin/makepkg --syncdeps --holdver
     )
-    __log notice "Syncing $SRCDEST to $SRCDEST_ROOT..."
+    __log info "Syncing $SRCDEST to $SRCDEST_ROOT..."
     cp -r --no-preserve=ownership "$SRCDEST/." "$SRCDEST_ROOT"
-    __log notice "Grabbing built packages..."
+    __log info "Grabbing built packages..."
     local package eof
     eof="$(dd if=/dev/urandom bs=15 count=1 status=none | base64)"
     echo "packages<<$eof" >> "$GITHUB_OUTPUT"
@@ -209,7 +213,7 @@ function build() {
     do
         if [[ -f "$package" ]]
         then
-            __log notice "Copying $package to $PKGDEST_ROOT..."
+            __log info "Copying $package to $PKGDEST_ROOT..."
             cp "$package" "$PKGDEST_ROOT"
             echo "$package" | sed "s|$PKGDEST|$PKGDEST_ROOT|;s|$start_dir|.|" >> "$GITHUB_OUTPUT"
         fi
@@ -247,7 +251,7 @@ function download-sources() {
         # url=<scheme>://<host>/<path>
         if [[ "${url//:\/\/}" != "$url" ]] && [[ -n "$name" ]] && ! [[ "$url" =~ ^(git|file) ]]
         then
-            __log notice "Downloading $name with $url..."
+            __log info "Downloading $name with $url..."
             __invoke_downloader "$2" "$url" "$name"
         elif [[ "$url" =~ ^git ]]
         then
@@ -255,7 +259,7 @@ function download-sources() {
             return 1
         fi
     done < <($SUDO /usr/bin/makepkg --printsrcinfo | grep source | cut -d = -f 2 | sed 's/^[[:space:]]*//')
-    __log notice "Syncing $SRCDEST to $SRCDEST_ROOT..."
+    __log info "Syncing $SRCDEST to $SRCDEST_ROOT..."
     cp -r --no-preserve=ownership "$SRCDEST/." "$SRCDEST_ROOT"
     popd
 }
@@ -273,13 +277,13 @@ function fetch-pgp-keys() {
     local validpgpkeys
     validpgpkeys="$($SUDO /usr/bin/makepkg --printsrcinfo | grep validpgpkeys | cut -d = -f 2 | xargs)"
     mkdir -p keys/pgp
-    __log notice "Fetching GnuPG key(s) $validpgpkeys from keyservers..."
+    __log info "Fetching GnuPG key(s) $validpgpkeys from keyservers..."
     local -a fingerprints
     local fingerprint
     read -r -a fingerprints <<< "$validpgpkeys"
     for fingerprint in "${fingerprints[@]}"
     do
-        echo "::notice file=$0,line=$LINENO::Fetching $fingerprint..."
+        __log info "Fetching $fingerprint..."
         gpg --recv-keys "$fingerprint" || true
         if ! gpg --list-key "$fingerprint"
         then
@@ -317,7 +321,7 @@ function update-pacman-repo() {
         echo "$eof"
     } >> "$GITHUB_OUTPUT"
     popd
-    __log notice "Result of repo directory:"
+    __log info "Result of repo directory:"
     ls -l "$1"
 }
 
