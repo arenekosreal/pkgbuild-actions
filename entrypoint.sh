@@ -272,7 +272,7 @@ function fetch-pgp-keys() {
         __log error "Invalid arguments for fetch-pgp-keys. Expect >=1, got $#."
         return 1
     fi
-    local -r FALLBACK_KEYSERVER="keyserver.ubuntu.com"
+    local -ra FALLBACK_KEYSERVER=("keyserver.ubuntu.com" "keys.openpgp.org")
     __ensure_pkgbuild "$1"
     pushd "$1"
     local validpgpkeys
@@ -288,9 +288,19 @@ function fetch-pgp-keys() {
         gpg --recv-keys "$fingerprint" || true
         if ! gpg --list-key "$fingerprint"
         then
-            __log warning "Failed to fetch GnuPG keys with default keyserver, retrying with $FALLBACK_KEYSERVER..."
-            gpg --recv-keys --keyserver "$FALLBACK_KEYSERVER" "$fingerprint"
-            gpg --list-key "$fingerprint"
+            local fallback
+            for fallback in "${FALLBACK_KEYSERVER[@]}"
+            do
+                __log warning "Failed to fetch GnuPG keys with default keyserver, retrying with $fallback..."
+                gpg --recv-keys --keyserver "$fallback" "$fingerprint"
+                if ! gpg --list-key "$fingerprint"
+                then
+                    __log warning "Failed to fetch GnuPG keys with $fallback, retrying with next fallback server..."
+                else
+                    __log info "Fetch GnuPG keys with $fallback successfully."
+                    break
+                fi
+            done
         fi
         gpg --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
     done
