@@ -15,8 +15,9 @@ RUN pacman-key --init && \
     pacman-key --populate && \
     pacman -Syu --noconfirm
 # pacstrap seems not supports docker environment...
+# archlinuxarm-keyring seems not depended by base/base-devel
 RUN mkdir -p /alarm/var/lib/pacman && \
-    pacman -r /alarm -Sy base base-devel --noconfirm && \
+    pacman -r /alarm -Sy base base-devel archlinuxarm-keyring --noconfirm && \
     pacman -r /alarm -D --asdeps base-devel && \
     systemd-tmpfiles --create --root=/alarm && \
     rm -rf /alarm/etc/pacman.d/gnupg /alarm/var/cache/pacman
