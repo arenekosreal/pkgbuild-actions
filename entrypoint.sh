@@ -70,7 +70,7 @@ function __install_downloader() {
     __check_pacman_key
     pacman -Sy
     local package
-    package="$(pacman -Qoq "$1")"
+    package="$(pacman -Fq "/usr/bin/$1")"
     if [[ -z "$package" ]]
     then
         __log error "Unable to find package for downloader $1."
