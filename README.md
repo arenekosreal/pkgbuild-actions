@@ -2,6 +2,30 @@
 
 A series of GitHub Actions useful for building Arch Linux's PKGBUILD files in GitHub Action.
 
+## CI status
+
+[![Build container image, publish to ghcr.io and test actions](https://github.com/arenekosreal/pkgbuild-actions/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/arenekosreal/pkgbuild-actions/actions/workflows/ci.yml)
+
+## Features
+
+- Multi-arch support
+
+    You can handle `x86_64` and `aarch64` packages with those actions.
+    
+    How to use: 
+    
+    Set `runs-on` with proper value like `ubuntu-24.04` or `ubuntu-24.04-arm`. 
+    The latter will only available for public repository.
+    You can also run the docker image directly with `--platform` argument to specify which architecture you want to run.
+
+- No yay/paru
+
+    Everything is built with a minimal archlinux/archlinuxarm system with `base-devel`, `base` and other dependencies listed in PKGBUILD installed.
+    Not-in-official-repository dependencies will be installed from a custom repository so pacman can find it directly.
+    
+    This means you have to prepare a custom pacman repository yourself to storage those dependencies.
+    You can use `update-pacman-repo` action in this github repository to achieve that.
+
 ## Actions
 
 - build
