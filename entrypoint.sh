@@ -155,7 +155,7 @@ function __prepare_build_environment() {
     pacman -Sy
 }
 
-# bump-pkgver $dir [$env] [$repo]
+# bump-pkgver $dir [$env] [$repo] [$args]
 function bump-pkgver() {
     if [[ $# -lt 1 ]]
     then
@@ -173,7 +173,8 @@ function bump-pkgver() {
     (
         __append_extra_env "$2"
         __log info "Running makepkg now..."
-        $SUDO /usr/bin/makepkg --syncdeps --nobuild
+        # shellcheck disable=SC2086
+        $SUDO /usr/bin/makepkg --syncdeps --nobuild $4
     )
     popd
     if diff -u "$tmp/PKGBUILD" ./PKGBUILD > /dev/null
@@ -189,7 +190,7 @@ function bump-pkgver() {
     popd
 }
 
-# build $dir [$env] [$repo]
+# build $dir [$env] [$repo] [$args]
 function build() {
     if [[ $# -lt 1 ]]
     then
@@ -203,7 +204,8 @@ function build() {
     __log info "Running makepkg now..."
     (
         __append_extra_env "$2"
-        $SUDO /usr/bin/makepkg --syncdeps --holdver
+        # shellcheck disable=SC2086
+        $SUDO /usr/bin/makepkg --syncdeps --holdver $4
     )
     __log info "Syncing $SRCDEST to $SRCDEST_ROOT..."
     cp -r --no-preserve=ownership "$SRCDEST/." "$SRCDEST_ROOT"

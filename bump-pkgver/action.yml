@@ -16,6 +16,11 @@ inputs:
     required: false
     default: ''
 
+  args:
+    description: Extra arguments passed to makepkg
+    required: false
+    default: ''
+
 outputs:
   updated:
     description: If the PKGBUILD is updated.
@@ -29,3 +34,4 @@ runs:
     - ${{ inputs.directory }}
     - ${{ inputs.env }}
     - ${{ inputs.repo }}
+    - ${{ inputs.args }}

@@ -25,6 +25,12 @@ Bump $pkgver by running pkgver()
         Required: false
         
         Note: You can use `update-pacman-repo` action to generate one.
+
+- args
+
+        Extra arguments passed to makepkg
+
+        Required: false
         
 ## Outputs
 
@@ -43,4 +49,5 @@ Bump $pkgver by running pkgver()
     env: |
       PACKAGER="Me <me@example.com>"
     repo: my-custom-repo
+    args: --ignorearch
 ```

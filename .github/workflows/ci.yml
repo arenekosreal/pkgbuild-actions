@@ -104,6 +104,9 @@ jobs:
         repo:
           - ''
           - repo
+        args:
+          - ''
+          - --ignorearch
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -124,6 +127,7 @@ jobs:
           directory: ./tests/build-test
           env: ${{ matrix.env }}
           repo: ${{ matrix.repo }}
+          args: ${{ matrix.args }}
 
       - name: Check result
         run: |
@@ -149,6 +153,9 @@ jobs:
         repo:
           - ''
           - repo
+        args:
+          - ''
+          - --ignorearch
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -169,6 +176,7 @@ jobs:
           directory: ./tests/build-test
           env: ${{ matrix.env }}
           repo: ${{ matrix.repo }}
+          args: ${{ matrix.args }}
 
       - name: Check outputs
         run: |

@@ -26,6 +26,12 @@ Build PKGBUILD in a container.
     
         Note: You can use `update-pacman-repo` action to generate one.
 
+- args
+
+        Extra arguments passed to makepkg
+
+        Required: false
+
 ## Outputs
 
 - packages
@@ -46,6 +52,7 @@ Build PKGBUILD in a container.
     with:
       directory: ./package
       env: |
-          PACKAGER="Me <me@example.com>"
+        PACKAGER="Me <me@example.com>"
       repo: my-custom-repo
+      args: --ignorearch
 ```
