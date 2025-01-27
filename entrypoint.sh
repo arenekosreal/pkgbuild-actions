@@ -278,7 +278,6 @@ function fetch-pgp-keys() {
         __log error "Invalid arguments for fetch-pgp-keys. Expect >=1, got $#."
         return 1
     fi
-    local -ra FALLBACK_KEYSERVER=("keyserver.ubuntu.com" "keys.openpgp.org")
     __ensure_pkgbuild "$1"
     pushd "$1"
     local validpgpkeys
