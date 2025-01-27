@@ -284,31 +284,30 @@ function fetch-pgp-keys() {
     validpgpkeys="$($SUDO /usr/bin/makepkg --printsrcinfo | grep validpgpkeys | cut -d = -f 2 | xargs)"
     mkdir -p keys/pgp
     __log info "Fetching GnuPG key(s) $validpgpkeys from keyservers..."
+    local fingerprint
     local -a fingerprints gpg_args=("" "--keyserver keyserver.ubuntu.com" "--keyserver keys.openpgp.org")
     read -r -a fingerprints <<< "$validpgpkeys"
-    __log info "Fetching ${fingerprints[*]}..."
-    local gpg_arg success=false
-    for gpg_arg in "${gpg_args[@]}"
-    do
-        __log info "Fetching with extra arguments \`$gpg_arg\`..."
-        # https://github.com/nodejs/docker-node/issues/922
-        # shellcheck disable=SC2086
-        if gpg $gpg_arg --no-tty --recv-keys "${fingerprints[@]}"
-        then
-            success=true
-            break
-        else
-            __log warning "Failed to fetch GnuPG keys with current extra arguments, trying next one..."
-        fi
-    done
-    if ! "$success"
-    then
-        __log error "Failed to fetch GnuPG keys with all extra arguments, exiting..."
-        exit 2
-    fi
     for fingerprint in "${fingerprints[@]}"
     do
-        gpg --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
+        local success=false gpg_arg
+        for gpg_arg in "${gpg_args[@]}"
+        do
+            local GPG="gpg $gpg_arg --no-tty --recv-keys"
+            __log info "Fetching $fingerprint with extra arguments \`$gpg_arg\`..."
+            if $GPG "$fingerprint"
+            then
+                success=true
+                break
+            else
+                __log warning "Failed to fetch $fingerprint with extra arguments, trying next extra arguments..."
+            fi
+        done
+        if ! "$success"
+        then
+            __log error "Failed to fetch GnuPG keys with all extra arguments, exiting..."
+            exit 2
+        fi
+        gpg --no-tty --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
     done
     echo "validpgpkeys=$validpgpkeys" >> "$GITHUB_OUTPUT"
     popd
