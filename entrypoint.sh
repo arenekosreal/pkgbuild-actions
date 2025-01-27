@@ -282,35 +282,30 @@ function fetch-pgp-keys() {
     validpgpkeys="$($SUDO /usr/bin/makepkg --printsrcinfo | grep validpgpkeys | cut -d = -f 2 | xargs)"
     mkdir -p keys/pgp
     __log info "Fetching GnuPG key(s) $validpgpkeys from keyservers..."
-    local -a fingerprints
-    local fingerprint
+    local -a fingerprints gpg_args=("" "--keyserver keyserver.ubuntu.com" "--keyserver keys.openpgp.org")
     read -r -a fingerprints <<< "$validpgpkeys"
+    __log info "Fetching ${fingerprints[*]}..."
+    local gpg_arg success=false
+    for gpg_arg in "${gpg_args[@]}"
+    do
+        __log info "Fetching with extra arguments \`$gpg_arg\`..."
+        # https://github.com/nodejs/docker-node/issues/922
+        # shellcheck disable=SC2086
+        if gpg $gpg_arg --no-tty --recv-keys "${fingerprints[@]}"
+        then
+            success=true
+            break
+        else
+            __log warning "Failed to fetch GnuPG keys with current extra arguments, trying next one..."
+        fi
+    done
+    if ! "$success"
+    then
+        __log error "Failed to fetch GnuPG keys with all extra arguments, exiting..."
+        exit 2
+    fi
     for fingerprint in "${fingerprints[@]}"
     do
-        __log info "Fetching $fingerprint..."
-        gpg --recv-keys "$fingerprint" || true
-        if ! gpg --list-key "$fingerprint"
-        then
-            local fallback success=false
-            for fallback in "${FALLBACK_KEYSERVER[@]}"
-            do
-                __log warning "Failed to fetch GnuPG keys with default keyserver, retrying with $fallback..."
-                gpg --recv-keys --keyserver "$fallback" "$fingerprint" || true
-                if ! gpg --list-key "$fingerprint"
-                then
-                    __log warning "Failed to fetch GnuPG keys with $fallback, retrying with next fallback server..."
-                else
-                    __log info "Fetch GnuPG keys with $fallback successfully."
-                    success=true
-                    break
-                fi
-            done
-            if ! "$success"
-            then
-                __log error "Failed to fetch GnuPG keys with all fallback servers."
-                return 2
-            fi
-        fi
         gpg --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
     done
     echo "validpgpkeys=$validpgpkeys" >> "$GITHUB_OUTPUT"
