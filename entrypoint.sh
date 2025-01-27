@@ -13,7 +13,7 @@ SUDO="/usr/bin/sudo -u builder \
            --preserve-env=PKGDEST  \
            --preserve-env=SRCDEST  \
            --preserve-env=SOURCE_DATE_EPOCH"
-GPG="/usr/bin/gpg --batch"
+GPG="/usr/bin/gpg --batch --yes"
 
 # __log $level $msg
 function __log() {
