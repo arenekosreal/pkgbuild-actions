@@ -307,7 +307,7 @@ function fetch-pgp-keys() {
             __log error "Failed to fetch GnuPG keys with all extra arguments, exiting..."
             exit 2
         fi
-        gpg --no-tty --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
+        gpg --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
     done
     echo "validpgpkeys=$validpgpkeys" >> "$GITHUB_OUTPUT"
     popd
