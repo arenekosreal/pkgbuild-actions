@@ -2,14 +2,6 @@
 
 set -e
 
-# https://imil.net/blog/posts/2020/testing-gpg-keys-with-docker/
-# shellcheck disable=SC2155
-export GPG_TTY="$(tty)"
-if [[ -z "$GPG_TTY" ]]
-then
-    GPG_TTY=/dev/console
-fi
-
 export BUILDDIR=/build PKGDEST=/pkgdest SRCDEST=/srcdest
 
 declare PKGDEST_ROOT="$GITHUB_WORKSPACE$PKGDEST" \
@@ -21,6 +13,7 @@ SUDO="/usr/bin/sudo -u builder \
            --preserve-env=PKGDEST  \
            --preserve-env=SRCDEST  \
            --preserve-env=SOURCE_DATE_EPOCH"
+GPG="/usr/bin/gpg --batch"
 
 # __log $level $msg
 function __log() {
@@ -156,7 +149,7 @@ function __prepare_build_environment() {
     then
         __log info "Importing GnuPG public keys..."
         # shellcheck disable=SC2086
-        find keys/pgp -maxdepth 1 -mindepth 1 -type f -regex ".+\.asc$" -exec $SUDO gpg --import {} \;
+        find keys/pgp -maxdepth 1 -mindepth 1 -type f -regex ".+\.asc$" -exec $SUDO $GPG --import {} \;
     fi
     if [[ -n "$1" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.db" ]] && [[ -e "$GITHUB_WORKSPACE/$1/$1.files" ]] && ! pacman-conf --repo="$1" > /dev/null
     then
@@ -300,9 +293,9 @@ function fetch-pgp-keys() {
         local success=false gpg_arg
         for gpg_arg in "${gpg_args[@]}"
         do
-            local GPG="gpg $gpg_arg --recv-keys"
+            local gpg="$GPG $gpg_arg --recv-keys"
             __log info "Fetching $fingerprint with extra arguments \`$gpg_arg\`..."
-            if $GPG "$fingerprint"
+            if $gpg "$fingerprint"
             then
                 success=true
                 break
@@ -315,7 +308,7 @@ function fetch-pgp-keys() {
             __log error "Failed to fetch GnuPG keys with all extra arguments, exiting..."
             exit 2
         fi
-        gpg --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
+        $GPG --export --armor -o "keys/pgp/$fingerprint.asc" "$fingerprint"
     done
     echo "validpgpkeys=$validpgpkeys" >> "$GITHUB_OUTPUT"
     popd
