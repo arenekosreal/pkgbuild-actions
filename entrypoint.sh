@@ -120,11 +120,14 @@ function __append_extra_env() {
     local env_line
     while read -r env_line
     do
-        if [[ "$env_line" =~ .+=.+ ]]
+        if [[ "$env_line" =~ ^[a-zA-Z_][0-9a-zA-Z_]*=.* ]]
         then
-            __log info "Exporting environment $env_line now..."
-            export "${env_line?}"
-            SUDO+=" --preserve-env=$(echo "$env_line" | cut -d = -f 1 | xargs)"
+            local key value
+            key="$(echo "$env_line" | cut -d = -f 1 | xargs)"
+            value="$(echo "$env_line" | cut -d = -f 2- | xargs)"
+            __log info "Exporting environment $key=$value now..."
+            export "$key"="$value"
+            SUDO+=" --preserve-env=$key"
         else
             __log debug "Invalid environment $env_line, skipping..."
         fi

@@ -149,6 +149,7 @@ jobs:
         env:
           - ''
           - CUSTOM_ENVIRONMENT=custom-value
+          - CUSTOM_ENVIRONMENT_WITH_SPACE=custom value
 
         repo:
           - ''
