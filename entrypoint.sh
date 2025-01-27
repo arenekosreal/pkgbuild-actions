@@ -2,6 +2,15 @@
 
 set -e
 
+# https://imil.net/blog/posts/2020/testing-gpg-keys-with-docker/
+declare GPG_TTY
+GPG_TTY="$(tty)"
+if [[ -z "$GPG_TTY" ]]
+then
+    GPG_TTY=/dev/console
+fi
+export GPG_TTY
+
 export BUILDDIR=/build PKGDEST=/pkgdest SRCDEST=/srcdest
 
 declare PKGDEST_ROOT="$GITHUB_WORKSPACE$PKGDEST" \
@@ -292,7 +301,7 @@ function fetch-pgp-keys() {
         local success=false gpg_arg
         for gpg_arg in "${gpg_args[@]}"
         do
-            local GPG="gpg $gpg_arg --no-tty --recv-keys"
+            local GPG="gpg $gpg_arg --recv-keys"
             __log info "Fetching $fingerprint with extra arguments \`$gpg_arg\`..."
             if $GPG "$fingerprint"
             then
