@@ -3,13 +3,12 @@
 set -e
 
 # https://imil.net/blog/posts/2020/testing-gpg-keys-with-docker/
-declare GPG_TTY
-GPG_TTY="$(tty)"
+# shellcheck disable=SC2155
+export GPG_TTY="$(tty)"
 if [[ -z "$GPG_TTY" ]]
 then
     GPG_TTY=/dev/console
 fi
-export GPG_TTY
 
 export BUILDDIR=/build PKGDEST=/pkgdest SRCDEST=/srcdest
 
