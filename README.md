@@ -2,6 +2,11 @@
 
 A series of GitHub Actions useful for building Arch Linux's PKGBUILD files in GitHub Action.
 
+> [!IMPORTANT]
+> pkgbuild-actions is deprecated due to its complexity.
+> If you are looking for an alternative, you can check [makepkg-action](https://github.com/arenekosreal/makepkg-action).
+> But it requires manual migration.
+
 ## CI status
 
 [![Build container image, publish to ghcr.io and test actions](https://github.com/arenekosreal/pkgbuild-actions/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/arenekosreal/pkgbuild-actions/actions/workflows/ci.yml)
